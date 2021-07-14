@@ -129,7 +129,7 @@ def post_short_drinks(payload):
 '''
 
 
-@app.route('/drinks/<id>', methods=['PATCH'])
+@app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
 def patch_drink(payload, id):
     try:
@@ -137,8 +137,11 @@ def patch_drink(payload, id):
         drink = Drink.query.filter(Drink.id == id).one_or_none()
         if drink is None:
             abort(404)
-        drink.title = body['title'];
-        drink.recipe = json.dumps(body['recipe'])
+        for key, value in body.items():
+            if key == 'title':
+                drink.title = value
+            if key == 'recipe':
+                drink.recipe = value
         drink.update()
         drinks = Drink.query.all()
         all_drinks  =[]
@@ -147,13 +150,11 @@ def patch_drink(payload, id):
         return jsonify({
             'success': True,
             'response' : 200,
-            'drinks' : all_drinks
+            'drinks' : 'all_drinks'
         })
     except BaseException:
         abort(404)
-
-
-'''
+        '''
 @TODO implement endpoint
     DELETE /drinks/<id>
         where <id> is the existing model id
@@ -167,8 +168,6 @@ def patch_drink(payload, id):
 @app.route('/drinks/<id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
 def delete_drink(payload, id):
-    print(payload)
-    print(id)
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
         drink.delete()
